@@ -12,8 +12,8 @@ window.addEventListener("DOMContentLoaded", () => {
             return { alias, symbol };
         };
 
-        const x = player("A", "X"); // TODO ask name to player A
-        const o = player("B", "O"); // TODO ask name to player B
+        const x = player("X", "X"); // TODO ask name to player A
+        const o = player("O", "O"); // TODO ask name to player B
 
         let current = x;
 
@@ -49,14 +49,34 @@ window.addEventListener("DOMContentLoaded", () => {
                 players.current === players.x ? players.o : players.x;
         }
 
-        const gridDiv = document.getElementById("grid");
-        gridDiv.addEventListener("click", processMove);
-
         function processMove(e) {
             saveMove(e);
             togglePlayer();
         }
+
+        const gridDiv = document.getElementById("grid");
+        gridDiv.addEventListener("click", processMove);
     };
 
-    playGame();
+    function newGame() {
+        const formStartGame = document.getElementById("form-start-game");
+        formStartGame.addEventListener("submit", setGameBoard);
+
+        function setGameBoard(e) {
+            e.preventDefault();
+
+            // const playerXAlias = document.getElementById("player-x-alias");
+            // const playerOAlias = document.getElementById("player-o-alias");
+
+            const form = e.currentTarget;
+            form.classList.add("hidden");
+
+            const gridDiv = document.getElementById("grid");
+            gridDiv.classList.remove("hidden");
+
+            playGame();
+        }
+    }
+
+    newGame();
 });

@@ -13,9 +13,14 @@
 </head>
 
 <body>
+    <h1>Tic Tac Toe</h1>
     <div id="wrapper">
-        <h1>Tic Tac Toe</h1>
-        <div id="grid">
+        <form id="form-start-game">
+            <!-- <label><input type="text" name="player-x-alias" id="player-x-alias" placeholder="Player X alias"></label>
+            <label><input type="text" name="player-o-alias" id="player-o-alias" placeholder="Player O alias"></label> -->
+            <button type="submit">Start!</button>
+        </form>
+        <div id="grid" class="hidden">
             <div id="position-0" data-pos="0" class="position"></div>
             <div id="position-1" data-pos="1" class="position"></div>
             <div id="position-2" data-pos="2" class="position"></div>
