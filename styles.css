@@ -9,10 +9,17 @@ html {
 }
 
 body {
-    font-family: "Montserrat", sans-serif;
+    font-family: "Indie Flower", cursive;
+
     margin: 0;
     color: #2b2b2b;
-    background-color: #cccccc;
+    background-color: #e2ded4;
+    background: repeating-linear-gradient(
+        #e2ded4,
+        #e2ded4 25px,
+        #9198e5a6 26px,
+        #9198e5a6 27px
+    );
     height: 100vh;
     display: flex;
     flex-direction: column;
@@ -62,7 +69,9 @@ button:hover {
 }
 
 button[type="submit"] {
-    background-color: #daaa25;
+    background-color: transparent;
+    border-style: solid;
+    border-color: #daaa25;
     border-radius: 10px;
     padding: 10px;
     width: min-content;
@@ -72,14 +81,14 @@ button[type="submit"] {
 #grid {
     display: flex;
     flex-wrap: wrap;
-    width: 300px;
-    height: 300px;
+    width: 250px;
+    height: 250px;
+    margin-top: 20px;
 }
 
 .position {
     width: 33.33%;
     height: 33.33%;
-    border: 2px solid black;
     font-size: 80px;
     display: flex;
     justify-content: center;
@@ -87,9 +96,44 @@ button[type="submit"] {
     cursor: pointer;
 }
 
+#position-0 {
+    border-right: 2px solid black;
+    border-bottom: 2px solid black;
+}
+
+#position-1 {
+    border-bottom: 2px solid black;
+}
+
+#position-2 {
+    border-bottom: 2px solid black;
+    border-left: 2px solid black;
+}
+
+#position-3 {
+    border-right: 2px solid black;
+    border-bottom: 2px solid black;
+}
+
+#position-4 {
+    border-bottom: 2px solid black;
+}
+
+#position-5 {
+    border-bottom: 2px solid black;
+    border-left: 2px solid black;
+}
+
+#position-6 {
+    border-right: 2px solid black;
+}
+
+#position-8 {
+    border-left: 2px solid black;
+}
+
 .taken {
     cursor: not-allowed;
-    background-color: #ffae0085;
 }
 
 .xs {
@@ -102,4 +146,11 @@ button[type="submit"] {
 
 .hidden {
     display: none !important;
+}
+
+#winner {
+    font-size: 20px;
+    font-weight: 600;
+    margin-top: 40px;
+    height: 40px;
 }
