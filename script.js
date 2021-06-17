@@ -5,7 +5,7 @@ window.addEventListener("DOMContentLoaded", () => {
             db.push(null);
         }
 
-        const clean = () => {
+        const cleanDb = () => {
             for (let i = 0; i < 9; i++) {
                 db[i] = null;
             }
@@ -13,7 +13,17 @@ window.addEventListener("DOMContentLoaded", () => {
 
         const div = document.getElementById("grid");
 
-        return { db, div, clean };
+        const cleanDisplay = () => {
+            const positions = Array.from(div.children);
+            positions.forEach((position) => {
+                position.innerText = "";
+                position.classList.remove("taken");
+                position.classList.remove("xs");
+                position.classList.remove("os");
+            });
+        };
+
+        return { db, div, cleanDb, cleanDisplay };
     })();
 
     const players = (() => {
@@ -112,7 +122,8 @@ window.addEventListener("DOMContentLoaded", () => {
             function playAgain() {
                 const gameOver = document.getElementById("game-over");
                 gameOver.classList.add("hidden");
-                grid.clean();
+                grid.cleanDb();
+                grid.cleanDisplay();
                 console.log(grid.db);
             }
 
@@ -153,11 +164,7 @@ window.addEventListener("DOMContentLoaded", () => {
         function setGameBoard(e) {
             e.preventDefault();
 
-            // const playerXAlias = document.getElementById("player-x-alias");
-            // const playerOAlias = document.getElementById("player-o-alias");
-
             formStartGame.classList.add("hidden");
-
             grid.div.classList.remove("hidden");
 
             playGame();
