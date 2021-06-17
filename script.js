@@ -5,9 +5,15 @@ window.addEventListener("DOMContentLoaded", () => {
             db.push(null);
         }
 
+        const clean = () => {
+            for (let i = 0; i < 9; i++) {
+                db[i] = null;
+            }
+        };
+
         const div = document.getElementById("grid");
 
-        return { db, div };
+        return { db, div, clean };
     })();
 
     const players = (() => {
@@ -33,11 +39,10 @@ window.addEventListener("DOMContentLoaded", () => {
             }
 
             grid.db[position] = players.current.symbol;
-            console.log(grid.db);
         }
 
         function checkWinner() {
-            // console.table(grid.db);
+            console.table(grid.db);
             let winner = null;
 
             const xMoves = grid.db.reduce((a, e, i) => {
@@ -94,11 +99,24 @@ window.addEventListener("DOMContentLoaded", () => {
         }
 
         function endGame(winner) {
-            // grid.div.classList.add("hidden");
-            const winnerDiv = document.getElementById("winner");
-            winnerDiv.innerText = `Winner: ${winner.symbol}`;
-            // winnerDiv.classList.remove("hidden");
-            console.log(winner);
+            function displayGameOver() {
+                const winnerDiv = document.getElementById("winner");
+                winnerDiv.innerText = `Winner: ${winner.symbol}`;
+                const gameOver = document.getElementById("game-over");
+                gameOver.classList.remove("hidden");
+
+                const playAgainBtn = document.getElementById("play-again");
+                playAgainBtn.addEventListener("click", playAgain);
+            }
+
+            function playAgain() {
+                const gameOver = document.getElementById("game-over");
+                gameOver.classList.add("hidden");
+                grid.clean();
+                console.log(grid.db);
+            }
+
+            displayGameOver();
         }
 
         function processMove(e) {
@@ -114,8 +132,7 @@ window.addEventListener("DOMContentLoaded", () => {
             togglePlayer();
         }
 
-        const gridDiv = document.getElementById("grid");
-        gridDiv.addEventListener("click", processMove);
+        grid.div.addEventListener("click", processMove);
 
         const gameOverResults = [
             [0, 3, 6],

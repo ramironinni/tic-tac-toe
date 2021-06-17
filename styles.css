@@ -27,6 +27,10 @@ body {
     justify-content: center;
 }
 
+h1 {
+    margin: 0;
+}
+
 #wrapper {
     display: flex;
     flex-direction: column;
@@ -52,6 +56,8 @@ button {
     font-size: inherit;
     font-family: inherit;
     border: none;
+    cursor: pointer;
+    background-color: transparent;
 }
 
 input {
@@ -62,20 +68,25 @@ input {
     outline: none;
 }
 
-input:focus,
 button:hover {
-    box-shadow: 5px 5px 0px #343434;
+    color: #34a31e;
+    font-weight: 600;
     transition: 0.4s;
 }
 
 button[type="submit"] {
     background-color: transparent;
-    border-style: solid;
-    border-color: #daaa25;
-    border-radius: 10px;
+}
+
+#start-btn-container {
+    font-size: 30px;
+    background-color: transparent;
+    border-radius: 9px 6px 8px 25px;
+    border-bottom: 6px solid #43da257a;
     padding: 10px;
     width: min-content;
     margin-top: 20px;
+    transform: rotate(-9deg);
 }
 
 #grid {
@@ -148,9 +159,41 @@ button[type="submit"] {
     display: none !important;
 }
 
-#winner {
+#game-over {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+#winner-container {
     font-size: 20px;
     font-weight: 600;
-    margin-top: 40px;
-    height: 40px;
+    margin-top: 20px;
+    padding: 7px 19px 40px;
+    height: 30px;
+    border-radius: 66px 30px 69px 1px;
+    border-top: 5px solid #43da257a;
+    border-bottom: 5px solid #43da257a;
+    transform: rotate(-9deg);
+    position: relative;
+}
+
+#marker {
+    position: absolute;
+    left: 0;
+    height: 30px;
+    width: 110px;
+    border-radius: 9px 35px 10px 41px;
+    border-right: 6px solid #43da257a;
+    border-left: 6px solid #43da257a;
+    transform: rotate(-9deg);
+}
+
+#play-again {
+    font-size: 20px;
+    font-weight: 600;
+    border-bottom: 5px solid #43da257a;
+    transform: rotate(1deg);
 }

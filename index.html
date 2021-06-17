@@ -19,7 +19,10 @@
         <form id="form-start-game">
             <!-- <label><input type="text" name="player-x-alias" id="player-x-alias" placeholder="Player X alias"></label>
             <label><input type="text" name="player-o-alias" id="player-o-alias" placeholder="Player O alias"></label> -->
-            <button type="submit">Start!</button>
+            <div id="start-btn-container">
+                <button type="submit">Start!</button>
+
+            </div>
         </form>
         <div id="grid" class="hidden">
             <div id="position-0" data-pos="0" class="position"></div>
@@ -32,7 +35,13 @@
             <div id="position-7" data-pos="7" class="position"></div>
             <div id="position-8" data-pos="8" class="position"></div>
         </div>
-        <div id="winner" class=""></div>
+        <div id="game-over" class="hidden">
+            <div id="winner-container">
+                <div id="marker" class=""></div>
+                <div id="winner" class=""></div>
+            </div>
+            <button id="play-again">Play again!</button>
+        </div>
     </div>
 </body>
 
