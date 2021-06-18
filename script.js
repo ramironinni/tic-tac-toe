@@ -1,71 +1,12 @@
 window.addEventListener("DOMContentLoaded", () => {
     const players = (() => {
         function player(symbol) {
-            const startGame = () => {
-                grid.div.addEventListener("click", players.x.makeMove);
-            };
-
-            const endGame = () => {
-                grid.div.removeEventListener("click", players.x.makeMove);
-            };
-
-            const makeMove = (e) => {
-                grid.db.save(e);
-                grid.display.showMove(e);
-                const { winner, winningMove, isATie } = grid.db.checkWinner();
-                if (winner) {
-                    gameOver(winner, winningMove);
-                    return;
-                }
-                if (isATie) {
-                    gameOver(winner, winningMove, isATie);
-                }
-                toggle();
-            };
-
-            function gameOver(winner, winningMove, isATie) {
-                function displayWinningMove() {
-                    if (!isATie) {
-                        grid.display.winningMove(winningMove);
-                    }
-                }
-
-                function displayGameOver() {
-                    endGame();
-                    const winnerDiv = document.getElementById("winner");
-                    const gameOver = document.getElementById("game-over");
-                    gameOver.classList.remove("hidden");
-                    const playAgainBtn = document.getElementById("play-again");
-                    playAgainBtn.addEventListener("click", playAgain);
-
-                    if (isATie) {
-                        winnerDiv.innerText = "It's a tie";
-                        return;
-                    }
-
-                    winnerDiv.innerText = `Winner: ${winner.symbol}`;
-                }
-
-                function playAgain() {
-                    const gameOver = document.getElementById("game-over");
-                    gameOver.classList.add("hidden");
-                    grid.db.clear();
-                    grid.display.clearMoves();
-                    players.current = x;
-                    startGame();
-                }
-
-                displayGameOver();
-                displayWinningMove();
-            }
-            function displayTie() {}
-
             const toggle = () => {
                 players.current =
                     players.current === players.x ? players.o : players.x;
             };
 
-            return { symbol, makeMove, startGame };
+            return { symbol, toggle };
         }
 
         const x = player("X");
@@ -199,25 +140,84 @@ window.addEventListener("DOMContentLoaded", () => {
         const show = () => {
             div.classList.remove("hidden");
         };
-        // const hide = () => {
-        //     div.classList.add("hidden");
-        // };
 
         return { db, display, show, div };
     })();
 
-    function newGame() {
-        const formStartGame = document.getElementById("form-start-game");
-        formStartGame.addEventListener("submit", setGameBoard);
+    const game = (() => {
+        const newOne = () => {
+            const formStartGame = document.getElementById("form-start-game");
+            formStartGame.addEventListener("submit", setGameBoard);
 
-        function setGameBoard(e) {
-            e.preventDefault();
+            function setGameBoard(e) {
+                e.preventDefault();
 
-            formStartGame.classList.add("hidden");
-            grid.show();
-            players.current.startGame();
+                formStartGame.classList.add("hidden");
+                grid.show();
+                game.start();
+            }
+        };
+
+        const start = () => {
+            grid.div.addEventListener("click", makeMove);
+        };
+
+        const makeMove = (e) => {
+            grid.db.save(e);
+            grid.display.showMove(e);
+            const { winner, winningMove, isATie } = grid.db.checkWinner();
+            if (winner) {
+                game.over(winner, winningMove);
+                return;
+            }
+            if (isATie) {
+                game.over(winner, winningMove, isATie);
+            }
+            players.current.toggle();
+        };
+
+        const end = () => {
+            grid.div.removeEventListener("click", makeMove);
+        };
+
+        function over(winner, winningMove, isATie) {
+            function displayWinningMove() {
+                if (!isATie) {
+                    grid.display.winningMove(winningMove);
+                }
+            }
+
+            function displayGameOver() {
+                game.end();
+                const winnerDiv = document.getElementById("winner");
+                const gameOver = document.getElementById("game-over");
+                gameOver.classList.remove("hidden");
+                const playAgainBtn = document.getElementById("play-again");
+                playAgainBtn.addEventListener("click", playAgain);
+
+                if (isATie) {
+                    winnerDiv.innerText = "It's a tie";
+                    return;
+                }
+
+                winnerDiv.innerText = `Winner: ${winner.symbol}`;
+            }
+
+            function playAgain() {
+                const gameOver = document.getElementById("game-over");
+                gameOver.classList.add("hidden");
+                grid.db.clear();
+                grid.display.clearMoves();
+                players.current = players.x;
+                game.start();
+            }
+
+            displayGameOver();
+            displayWinningMove();
         }
-    }
 
-    newGame();
+        return { newOne, start, end, over };
+    })();
+
+    game.newOne();
 });
