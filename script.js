@@ -41,6 +41,7 @@ window.addEventListener("DOMContentLoaded", () => {
                     gameOver.classList.add("hidden");
                     grid.db.clear();
                     grid.display.clearMoves();
+                    players.current = x;
                     startGame();
                 }
 
@@ -49,6 +50,7 @@ window.addEventListener("DOMContentLoaded", () => {
             }
 
             const toggle = () => {
+                console.log("toggled");
                 players.current =
                     players.current === players.x ? players.o : players.x;
             };
@@ -79,7 +81,6 @@ window.addEventListener("DOMContentLoaded", () => {
                 }
 
                 grid.db.storage[selectedPos] = players.current.symbol;
-                console.log(storage);
             };
 
             const clear = () => {
@@ -89,8 +90,6 @@ window.addEventListener("DOMContentLoaded", () => {
             };
 
             const checkWinner = () => {
-                console.table(storage);
-
                 function getMoves(playerSymbol) {
                     const moves = storage.reduce((a, e, i) => {
                         if (e === playerSymbol) a.push(i);
