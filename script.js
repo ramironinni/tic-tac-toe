@@ -12,15 +12,19 @@ window.addEventListener("DOMContentLoaded", () => {
             const makeMove = (e) => {
                 grid.db.save(e);
                 grid.display.showMove(e);
-                const winner = grid.db.checkWinner();
+                const { winner, winningMove } = grid.db.checkWinner();
                 if (winner) {
-                    gameOver(winner);
+                    gameOver(winner, winningMove);
                     return;
                 }
                 toggle();
             };
 
-            function gameOver(winner) {
+            function gameOver(winner, winningMove) {
+                function displayWinningMove() {
+                    grid.display.winningMove(winningMove);
+                }
+
                 function displayGameOver() {
                     endGame();
                     const winnerDiv = document.getElementById("winner");
@@ -41,6 +45,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 }
 
                 displayGameOver();
+                displayWinningMove();
             }
 
             const toggle = () => {
@@ -84,6 +89,24 @@ window.addEventListener("DOMContentLoaded", () => {
             };
 
             const checkWinner = () => {
+                console.table(storage);
+
+                function getMoves(playerSymbol) {
+                    const moves = storage.reduce((a, e, i) => {
+                        if (e === playerSymbol) a.push(i);
+                        return a;
+                    }, []);
+                    return moves;
+                }
+
+                const moves = (() => {
+                    const x = getMoves(players.x.symbol);
+                    const o = getMoves(players.o.symbol);
+                    return { x, o };
+                })();
+
+                // console.log(xMoves);
+                // console.log(oMoves);
                 const gameOverResults = [
                     [0, 3, 6],
                     [1, 4, 7],
@@ -95,41 +118,26 @@ window.addEventListener("DOMContentLoaded", () => {
                     [2, 4, 6],
                 ];
 
-                console.table(storage);
+                function checkForWinner(moves, player, result) {
+                    if (
+                        moves.indexOf(result[0]) > -1 &&
+                        moves.indexOf(result[1]) > -1 &&
+                        moves.indexOf(result[2]) > -1
+                    ) {
+                        winner = player;
+                        winningMove = result;
+                    }
+                }
+
                 let winner = null;
-
-                const xMoves = storage.reduce((a, e, i) => {
-                    if (e === "X") a.push(i);
-                    return a;
-                }, []);
-
-                const oMoves = storage.reduce((a, e, i) => {
-                    if (e === "O") a.push(i);
-                    return a;
-                }, []);
-
-                // console.log(xMoves);
-                // console.log(oMoves);
+                let winningMove = null;
 
                 gameOverResults.forEach((result) => {
-                    if (
-                        xMoves.indexOf(result[0]) > -1 &&
-                        xMoves.indexOf(result[1]) > -1 &&
-                        xMoves.indexOf(result[2]) > -1
-                    ) {
-                        winner = players.x;
-                    }
-
-                    if (
-                        oMoves.indexOf(result[0]) > -1 &&
-                        oMoves.indexOf(result[1]) > -1 &&
-                        oMoves.indexOf(result[2]) > -1
-                    ) {
-                        winner = players.o;
-                    }
+                    checkForWinner(moves.x, players.x, result);
+                    checkForWinner(moves.o, players.o, result);
                 });
 
-                return winner;
+                return { winner, winningMove };
             };
 
             return { storage, save, clear, checkWinner };
@@ -160,9 +168,18 @@ window.addEventListener("DOMContentLoaded", () => {
                     position.classList.remove("taken");
                     position.classList.remove("xs");
                     position.classList.remove("os");
+                    position.classList.remove("winning-position");
                 });
             };
-            return { showMove, clearMoves };
+
+            const winningMove = (winningPositions) => {
+                const gridPositions = div.children;
+                winningPositions.forEach((pos) => {
+                    gridPositions[pos].classList.add("winning-position");
+                });
+            };
+
+            return { showMove, clearMoves, winningMove };
         })();
 
         const show = () => {

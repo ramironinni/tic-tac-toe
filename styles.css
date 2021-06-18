@@ -155,6 +155,10 @@ button[type="submit"] {
     color: #2938c4;
 }
 
+.winning-position {
+    background-color: #43da257a;
+}
+
 .hidden {
     display: none !important;
 }
