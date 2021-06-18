@@ -1,161 +1,171 @@
 window.addEventListener("DOMContentLoaded", () => {
-    const grid = (() => {
-        const db = [];
-        for (let i = 0; i < 9; i++) {
-            db.push(null);
+    const players = (() => {
+        function player(symbol) {
+            const makeMove = (e) => {
+                grid.db.save(e);
+                grid.display.showMove(e);
+                const winner = grid.db.checkWinner();
+                if (winner) {
+                    endGame(winner);
+                    return;
+                }
+                toggle();
+            };
+
+            function endGame(winner) {
+                function displayGameOver() {
+                    const winnerDiv = document.getElementById("winner");
+                    winnerDiv.innerText = `Winner: ${winner.symbol}`;
+                    const gameOver = document.getElementById("game-over");
+                    gameOver.classList.remove("hidden");
+
+                    const playAgainBtn = document.getElementById("play-again");
+                    playAgainBtn.addEventListener("click", playAgain);
+                }
+
+                function playAgain() {
+                    const gameOver = document.getElementById("game-over");
+                    gameOver.classList.add("hidden");
+                    grid.db.clear();
+                    grid.display.clearMoves();
+                }
+
+                displayGameOver();
+            }
+
+            const toggle = () => {
+                players.current =
+                    players.current === players.x ? players.o : players.x;
+            };
+
+            const win = () => {};
+
+            return { symbol, makeMove, toggle, win };
         }
 
-        const cleanDb = () => {
-            for (let i = 0; i < 9; i++) {
-                db[i] = null;
-            }
-        };
-
-        const div = document.getElementById("grid");
-
-        const cleanDisplay = () => {
-            const positions = Array.from(div.children);
-            positions.forEach((position) => {
-                position.innerText = "";
-                position.classList.remove("taken");
-                position.classList.remove("xs");
-                position.classList.remove("os");
-            });
-        };
-
-        return { db, div, cleanDb, cleanDisplay };
-    })();
-
-    const players = (() => {
-        const player = (symbol) => {
-            return { symbol };
-        };
-
-        const x = player("X"); // TODO ask name to player A
-        const o = player("O"); // TODO ask name to player B
-
+        const x = player("X");
+        const o = player("O");
         let current = x;
 
         return { x, o, current };
     })();
 
-    const playGame = () => {
-        function saveMove(e) {
-            const position = e.target.dataset.pos;
-            const selectedPosition = grid.db[position];
-
-            if (selectedPosition) {
-                return;
+    const grid = (() => {
+        const db = (() => {
+            const storage = [];
+            for (let i = 0; i < 9; i++) {
+                storage.push(null);
             }
+            const save = (e) => {
+                const selectedPos = e.target.dataset.pos;
+                const isTaken = grid.db.storage[selectedPos];
 
-            grid.db[position] = players.current.symbol;
-        }
-
-        function checkWinner() {
-            console.table(grid.db);
-            let winner = null;
-
-            const xMoves = grid.db.reduce((a, e, i) => {
-                if (e === "X") a.push(i);
-                return a;
-            }, []);
-
-            const oMoves = grid.db.reduce((a, e, i) => {
-                if (e === "O") a.push(i);
-                return a;
-            }, []);
-
-            // console.log(xMoves);
-            // console.log(oMoves);
-
-            gameOverResults.forEach((result) => {
-                if (
-                    xMoves.indexOf(result[0]) > -1 &&
-                    xMoves.indexOf(result[1]) > -1 &&
-                    xMoves.indexOf(result[2]) > -1
-                ) {
-                    winner = players.x;
+                if (isTaken) {
+                    return;
                 }
 
-                if (
-                    oMoves.indexOf(result[0]) > -1 &&
-                    oMoves.indexOf(result[1]) > -1 &&
-                    oMoves.indexOf(result[2]) > -1
-                ) {
-                    winner = players.o;
+                grid.db.storage[selectedPos] = players.current.symbol;
+                console.log(storage);
+            };
+            const clear = () => {
+                for (let i = 0; i < 9; i++) {
+                    storage[i] = null;
                 }
-            });
+            };
 
-            return winner;
-        }
+            const checkWinner = () => {
+                const gameOverResults = [
+                    [0, 3, 6],
+                    [1, 4, 7],
+                    [2, 5, 8],
+                    [0, 1, 2],
+                    [3, 4, 5],
+                    [6, 7, 8],
+                    [0, 4, 8],
+                    [2, 4, 6],
+                ];
 
-        function displayMove(e) {
-            const currentPosition = e.target;
+                console.table(storage);
+                let winner = null;
 
-            if (currentPosition.innerText) {
-                return;
-            }
+                const xMoves = storage.reduce((a, e, i) => {
+                    if (e === "X") a.push(i);
+                    return a;
+                }, []);
 
-            currentPosition.innerText = players.current.symbol;
-            currentPosition.classList.add("taken");
+                const oMoves = storage.reduce((a, e, i) => {
+                    if (e === "O") a.push(i);
+                    return a;
+                }, []);
 
-            const playerClass = players.current.symbol === "X" ? "xs" : "os";
-            currentPosition.classList.add(playerClass);
-        }
+                // console.log(xMoves);
+                // console.log(oMoves);
 
-        function togglePlayer() {
-            players.current =
-                players.current === players.x ? players.o : players.x;
-        }
+                gameOverResults.forEach((result) => {
+                    if (
+                        xMoves.indexOf(result[0]) > -1 &&
+                        xMoves.indexOf(result[1]) > -1 &&
+                        xMoves.indexOf(result[2]) > -1
+                    ) {
+                        winner = players.x;
+                    }
 
-        function endGame(winner) {
-            function displayGameOver() {
-                const winnerDiv = document.getElementById("winner");
-                winnerDiv.innerText = `Winner: ${winner.symbol}`;
-                const gameOver = document.getElementById("game-over");
-                gameOver.classList.remove("hidden");
+                    if (
+                        oMoves.indexOf(result[0]) > -1 &&
+                        oMoves.indexOf(result[1]) > -1 &&
+                        oMoves.indexOf(result[2]) > -1
+                    ) {
+                        winner = players.o;
+                    }
+                });
 
-                const playAgainBtn = document.getElementById("play-again");
-                playAgainBtn.addEventListener("click", playAgain);
-            }
+                return winner;
+            };
 
-            function playAgain() {
-                const gameOver = document.getElementById("game-over");
-                gameOver.classList.add("hidden");
-                grid.cleanDb();
-                grid.cleanDisplay();
-                console.log(grid.db);
-            }
+            return { storage, save, clear, checkWinner };
+        })();
 
-            displayGameOver();
-        }
+        const div = document.getElementById("grid");
 
-        function processMove(e) {
-            saveMove(e);
-            displayMove(e);
+        const display = (() => {
+            const showMove = (e) => {
+                const selectedPos = e.target;
 
-            const winner = checkWinner();
-            if (winner) {
-                endGame(winner);
-                return;
-            }
+                if (selectedPos.innerText) {
+                    return;
+                }
 
-            togglePlayer();
-        }
+                selectedPos.innerText = players.current.symbol;
+                selectedPos.classList.add("taken");
 
-        grid.div.addEventListener("click", processMove);
+                const playerClass =
+                    players.current.symbol === "X" ? "xs" : "os";
+                selectedPos.classList.add(playerClass);
+            };
 
-        const gameOverResults = [
-            [0, 3, 6],
-            [1, 4, 7],
-            [2, 5, 8],
-            [0, 1, 2],
-            [3, 4, 5],
-            [6, 7, 8],
-            [0, 4, 8],
-            [2, 4, 6],
-        ];
-    };
+            const clearMoves = () => {
+                const positions = Array.from(div.children);
+                positions.forEach((position) => {
+                    position.innerText = "";
+                    position.classList.remove("taken");
+                    position.classList.remove("xs");
+                    position.classList.remove("os");
+                });
+            };
+            return { showMove, clearMoves };
+        })();
+
+        div.addEventListener("click", players.current.makeMove);
+
+        const show = () => {
+            div.classList.remove("hidden");
+        };
+        // const hide = () => {
+        //     div.classList.add("hidden");
+        // };
+
+        return { db, display, show, div };
+    })();
 
     function newGame() {
         const formStartGame = document.getElementById("form-start-game");
@@ -165,9 +175,7 @@ window.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
 
             formStartGame.classList.add("hidden");
-            grid.div.classList.remove("hidden");
-
-            playGame();
+            grid.show();
         }
     }
 
