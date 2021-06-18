@@ -1,19 +1,28 @@
 window.addEventListener("DOMContentLoaded", () => {
     const players = (() => {
         function player(symbol) {
+            const startGame = () => {
+                grid.div.addEventListener("click", players.current.makeMove);
+            };
+
+            const endGame = () => {
+                grid.div.removeEventListener("click", players.current.makeMove);
+            };
+
             const makeMove = (e) => {
                 grid.db.save(e);
                 grid.display.showMove(e);
                 const winner = grid.db.checkWinner();
                 if (winner) {
-                    endGame(winner);
+                    gameOver(winner);
                     return;
                 }
                 toggle();
             };
 
-            function endGame(winner) {
+            function gameOver(winner) {
                 function displayGameOver() {
+                    endGame();
                     const winnerDiv = document.getElementById("winner");
                     winnerDiv.innerText = `Winner: ${winner.symbol}`;
                     const gameOver = document.getElementById("game-over");
@@ -28,6 +37,7 @@ window.addEventListener("DOMContentLoaded", () => {
                     gameOver.classList.add("hidden");
                     grid.db.clear();
                     grid.display.clearMoves();
+                    startGame();
                 }
 
                 displayGameOver();
@@ -38,9 +48,7 @@ window.addEventListener("DOMContentLoaded", () => {
                     players.current === players.x ? players.o : players.x;
             };
 
-            const win = () => {};
-
-            return { symbol, makeMove, toggle, win };
+            return { symbol, makeMove, startGame };
         }
 
         const x = player("X");
@@ -56,6 +64,7 @@ window.addEventListener("DOMContentLoaded", () => {
             for (let i = 0; i < 9; i++) {
                 storage.push(null);
             }
+
             const save = (e) => {
                 const selectedPos = e.target.dataset.pos;
                 const isTaken = grid.db.storage[selectedPos];
@@ -67,6 +76,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 grid.db.storage[selectedPos] = players.current.symbol;
                 console.log(storage);
             };
+
             const clear = () => {
                 for (let i = 0; i < 9; i++) {
                     storage[i] = null;
@@ -155,8 +165,6 @@ window.addEventListener("DOMContentLoaded", () => {
             return { showMove, clearMoves };
         })();
 
-        div.addEventListener("click", players.current.makeMove);
-
         const show = () => {
             div.classList.remove("hidden");
         };
@@ -176,6 +184,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
             formStartGame.classList.add("hidden");
             grid.show();
+            players.current.startGame();
         }
     }
 
