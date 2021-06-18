@@ -2,11 +2,11 @@ window.addEventListener("DOMContentLoaded", () => {
     const players = (() => {
         function player(symbol) {
             const startGame = () => {
-                grid.div.addEventListener("click", players.current.makeMove);
+                grid.div.addEventListener("click", players.x.makeMove);
             };
 
             const endGame = () => {
-                grid.div.removeEventListener("click", players.current.makeMove);
+                grid.div.removeEventListener("click", players.x.makeMove);
             };
 
             const makeMove = (e) => {
