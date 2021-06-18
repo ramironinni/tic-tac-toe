@@ -12,28 +12,38 @@ window.addEventListener("DOMContentLoaded", () => {
             const makeMove = (e) => {
                 grid.db.save(e);
                 grid.display.showMove(e);
-                const { winner, winningMove } = grid.db.checkWinner();
+                const { winner, winningMove, isATie } = grid.db.checkWinner();
                 if (winner) {
                     gameOver(winner, winningMove);
                     return;
                 }
+                if (isATie) {
+                    gameOver(winner, winningMove, isATie);
+                }
                 toggle();
             };
 
-            function gameOver(winner, winningMove) {
+            function gameOver(winner, winningMove, isATie) {
                 function displayWinningMove() {
-                    grid.display.winningMove(winningMove);
+                    if (!isATie) {
+                        grid.display.winningMove(winningMove);
+                    }
                 }
 
                 function displayGameOver() {
                     endGame();
                     const winnerDiv = document.getElementById("winner");
-                    winnerDiv.innerText = `Winner: ${winner.symbol}`;
                     const gameOver = document.getElementById("game-over");
                     gameOver.classList.remove("hidden");
-
                     const playAgainBtn = document.getElementById("play-again");
                     playAgainBtn.addEventListener("click", playAgain);
+
+                    if (isATie) {
+                        winnerDiv.innerText = "It's a tie";
+                        return;
+                    }
+
+                    winnerDiv.innerText = `Winner: ${winner.symbol}`;
                 }
 
                 function playAgain() {
@@ -48,9 +58,9 @@ window.addEventListener("DOMContentLoaded", () => {
                 displayGameOver();
                 displayWinningMove();
             }
+            function displayTie() {}
 
             const toggle = () => {
-                console.log("toggled");
                 players.current =
                     players.current === players.x ? players.o : players.x;
             };
@@ -130,13 +140,18 @@ window.addEventListener("DOMContentLoaded", () => {
 
                 let winner = null;
                 let winningMove = null;
+                let isATie = null;
 
                 gameOverResults.forEach((result) => {
                     checkForWinner(moves.x, players.x, result);
                     checkForWinner(moves.o, players.o, result);
                 });
 
-                return { winner, winningMove };
+                if (!storage.some((position) => position === null) && !winner) {
+                    isATie = true;
+                }
+
+                return { winner, winningMove, isATie };
             };
 
             return { storage, save, clear, checkWinner };
