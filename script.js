@@ -144,7 +144,37 @@ window.addEventListener("DOMContentLoaded", () => {
     })();
 
     const game = (() => {
-        const newOne = () => {
+        const setType = () => {
+            const playerOne = document.getElementById("1-player-label");
+            const playersTwo = document.getElementById("2-players-label");
+
+            const playersContainer = document.getElementById(
+                "players-quantity-container"
+            );
+
+            playersContainer.addEventListener("click", checkedSelection);
+
+            function checkedSelection(e) {
+                if (e.currentTarget != e.target) {
+                    const label = e.target;
+                    if (label === playerOne) {
+                        playerOne.classList.add("players-selected");
+                        playersTwo.classList.remove("players-selected");
+                    }
+
+                    if (label === playersTwo) {
+                        playersTwo.classList.add("players-selected");
+                        playerOne.classList.remove("players-selected");
+                    }
+
+                    const startBtn = document.getElementById(
+                        "start-btn-container"
+                    );
+                    startBtn.classList.remove("hidden");
+                }
+            }
+        };
+        const setFirstOne = () => {
             const formStartGame = document.getElementById("form-start-game");
             formStartGame.addEventListener("submit", setGameBoard);
 
@@ -220,8 +250,9 @@ window.addEventListener("DOMContentLoaded", () => {
             displayWinningMove();
         }
 
-        return { newOne };
+        return { setType, setFirstOne };
     })();
 
-    game.newOne();
+    game.setType();
+    game.setFirstOne();
 });

@@ -17,11 +17,14 @@
     <h1>Tic Tac Toe</h1>
     <div id="wrapper">
         <form id="form-start-game">
-            <!-- <label><input type="text" name="player-x-alias" id="player-x-alias" placeholder="Player X alias"></label>
-            <label><input type="text" name="player-o-alias" id="player-o-alias" placeholder="Player O alias"></label> -->
-            <div id="start-btn-container">
+            <div id="players-quantity-container">
+                <label id="1-player-label">1 player<input type="radio" name="players" id="1-player"
+                        class="hidden"></label>
+                <label id="2-players-label">2 players<input type="radio" name="players" id="2-players"
+                        class="hidden"></label>
+            </div>
+            <div id="start-btn-container" class="hidden">
                 <button type="submit">Start!</button>
-
             </div>
         </form>
         <div id="grid" class="hidden">

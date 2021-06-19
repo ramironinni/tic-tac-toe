@@ -44,11 +44,24 @@ h1 {
     align-items: center;
 }
 
-label {
+#players-quantity-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    margin-top: 20px;
+    font-size: 25px;
+}
+
+#players-quantity-container > label {
+    margin-top: 10px;
+    transform: skewX(-20deg);
+}
+
+#players-quantity-container > label:hover {
+    cursor: pointer;
+}
+
+.players-selected {
+    font-weight: 600;
+    background-color: #da25d159;
 }
 
 input,
