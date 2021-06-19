@@ -23,14 +23,15 @@ window.addEventListener("DOMContentLoaded", () => {
                 storage.push(null);
             }
 
+            const isTaken = (selectedPos) => {
+                if (grid.db.storage[selectedPos]) {
+                    return true;
+                }
+                return false;
+            };
+
             const save = (e) => {
                 const selectedPos = e.target.dataset.pos;
-                const isTaken = grid.db.storage[selectedPos];
-
-                if (isTaken) {
-                    return;
-                }
-
                 grid.db.storage[selectedPos] = players.current.symbol;
             };
 
@@ -55,9 +56,7 @@ window.addEventListener("DOMContentLoaded", () => {
                     return { x, o };
                 })();
 
-                // console.log(xMoves);
-                // console.log(oMoves);
-                const gameOverResults = [
+                const gameOverWinningMoves = [
                     [0, 3, 6],
                     [1, 4, 7],
                     [2, 5, 8],
@@ -68,34 +67,34 @@ window.addEventListener("DOMContentLoaded", () => {
                     [2, 4, 6],
                 ];
 
-                function checkForWinner(moves, player, result) {
+                function checkForWinner(moves, player, winningMoves) {
                     if (
-                        moves.indexOf(result[0]) > -1 &&
-                        moves.indexOf(result[1]) > -1 &&
-                        moves.indexOf(result[2]) > -1
+                        moves.indexOf(winningMoves[0]) > -1 &&
+                        moves.indexOf(winningMoves[1]) > -1 &&
+                        moves.indexOf(winningMoves[2]) > -1
                     ) {
                         winner = player;
-                        winningMove = result;
+                        winnerMoves = winningMoves;
                     }
                 }
 
                 let winner = null;
-                let winningMove = null;
+                let winnerMoves = null;
                 let isATie = null;
 
-                gameOverResults.forEach((result) => {
-                    checkForWinner(moves.x, players.x, result);
-                    checkForWinner(moves.o, players.o, result);
+                gameOverWinningMoves.forEach((winningMoves) => {
+                    checkForWinner(moves.x, players.x, winningMoves);
+                    checkForWinner(moves.o, players.o, winningMoves);
                 });
 
                 if (!storage.some((position) => position === null) && !winner) {
                     isATie = true;
                 }
 
-                return { winner, winningMove, isATie };
+                return { winner, winnerMoves, isATie };
             };
 
-            return { storage, save, clear, checkWinner };
+            return { storage, isTaken, save, clear, checkWinner };
         })();
 
         const div = document.getElementById("grid");
@@ -127,14 +126,14 @@ window.addEventListener("DOMContentLoaded", () => {
                 });
             };
 
-            const winningMove = (winningPositions) => {
+            const showWinnerMoves = (winningPositions) => {
                 const gridPositions = div.children;
                 winningPositions.forEach((pos) => {
                     gridPositions[pos].classList.add("winning-position");
                 });
             };
 
-            return { showMove, clearMoves, winningMove };
+            return { showMove, clearMoves, showWinnerMoves };
         })();
 
         const show = () => {
@@ -154,41 +153,46 @@ window.addEventListener("DOMContentLoaded", () => {
 
                 formStartGame.classList.add("hidden");
                 grid.show();
-                game.start();
+                start();
             }
         };
 
         const start = () => {
-            grid.div.addEventListener("click", makeMove);
+            grid.div.addEventListener("click", processMove);
         };
 
-        const makeMove = (e) => {
+        const processMove = (e) => {
+            const selectedPos = e.target.dataset.pos;
+            if (grid.db.isTaken(selectedPos)) {
+                return;
+            }
+
             grid.db.save(e);
             grid.display.showMove(e);
-            const { winner, winningMove, isATie } = grid.db.checkWinner();
+            const { winner, winnerMoves, isATie } = grid.db.checkWinner();
             if (winner) {
-                game.over(winner, winningMove);
+                over(winner, winnerMoves);
                 return;
             }
             if (isATie) {
-                game.over(winner, winningMove, isATie);
+                over(winner, winnerMoves, isATie);
             }
             players.current.toggle();
         };
 
         const end = () => {
-            grid.div.removeEventListener("click", makeMove);
+            grid.div.removeEventListener("click", processMove);
         };
 
-        function over(winner, winningMove, isATie) {
+        function over(winner, winnerMoves, isATie) {
             function displayWinningMove() {
                 if (!isATie) {
-                    grid.display.winningMove(winningMove);
+                    grid.display.showWinnerMoves(winnerMoves);
                 }
             }
 
             function displayGameOver() {
-                game.end();
+                end();
                 const winnerDiv = document.getElementById("winner");
                 const gameOver = document.getElementById("game-over");
                 gameOver.classList.remove("hidden");
@@ -209,14 +213,14 @@ window.addEventListener("DOMContentLoaded", () => {
                 grid.db.clear();
                 grid.display.clearMoves();
                 players.current = players.x;
-                game.start();
+                start();
             }
 
             displayGameOver();
             displayWinningMove();
         }
 
-        return { newOne, start, end, over };
+        return { newOne };
     })();
 
     game.newOne();
