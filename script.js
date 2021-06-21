@@ -28,14 +28,14 @@ window.addEventListener("DOMContentLoaded", () => {
             }
 
             const isTaken = (selectedPos) => {
-                if (grid.db.storage[selectedPos]) {
+                if (storage[selectedPos]) {
                     return true;
                 }
                 return false;
             };
 
             const save = (selectedPos) => {
-                grid.db.storage[selectedPos] = players.current.symbol;
+                storage[selectedPos] = players.current.symbol;
             };
 
             const clear = () => {
@@ -129,7 +129,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 });
             };
 
-            const showWinnerMoves = (winningPositions) => {
+            const winnerMoves = (winningPositions) => {
                 const gridPositions = div.children;
                 winningPositions.forEach((pos) => {
                     gridPositions[pos].classList.add("winning-position");
@@ -140,7 +140,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 div.classList.add("hidden");
             };
 
-            return { refresh, clearMoves, showWinnerMoves, hide };
+            return { refresh, clearMoves, winnerMoves, hide };
         })();
 
         const show = () => {
@@ -153,17 +153,17 @@ window.addEventListener("DOMContentLoaded", () => {
     // *** GAME ***
 
     const game = (() => {
-        const displayType = () => {
-            const singlePlayer = document.getElementById("1-player-label");
-            const twoPlayers = document.getElementById("2-players-label");
+        const askType = () => {
+            const singlePlayer = document.getElementById("single-player-label");
+            const twoPlayers = document.getElementById("two-players-label");
 
             const playersContainer = document.getElementById(
                 "players-quantity-container"
             );
 
-            playersContainer.addEventListener("click", checkedSelection);
+            playersContainer.addEventListener("click", displayType);
 
-            function checkedSelection(e) {
+            function displayType(e) {
                 if (e.currentTarget != e.target) {
                     const label = e.target;
                     if (label === singlePlayer) {
@@ -188,6 +188,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
         const setNewOne = () => {
             const formStartGame = document.getElementById("form-start-game");
+            formStartGame.classList.remove("hidden");
             formStartGame.addEventListener("submit", setGameBoard);
 
             function setGameBoard(e) {
@@ -208,8 +209,22 @@ window.addEventListener("DOMContentLoaded", () => {
             grid.div.addEventListener("click", getPlayerInput);
         };
 
-        function autoMove() {
-            const notTakenPos = (() => {
+        const processMove = (position) => {
+            grid.db.save(position);
+            grid.display.refresh();
+            const { winner, winnerMoves, isATie } = grid.db.checkWinner();
+            if (winner) {
+                endGame(winner, winnerMoves);
+                return;
+            }
+            if (isATie) {
+                endGame(winner, winnerMoves, isATie);
+            }
+            players.current.toggle();
+        };
+
+        function getAutoMove() {
+            const notTakenPositions = (() => {
                 const pos = grid.db.storage.reduce((a, e, i) => {
                     if (e === null) a.push(i);
                     return a;
@@ -217,24 +232,12 @@ window.addEventListener("DOMContentLoaded", () => {
                 return pos;
             })();
 
-            const randomIndex = Math.floor(Math.random() * notTakenPos.length);
+            const randomIndex = Math.floor(
+                Math.random() * notTakenPositions.length
+            );
 
-            processMove(notTakenPos[randomIndex]);
+            processMove(notTakenPositions[randomIndex]);
         }
-
-        const processMove = (position) => {
-            grid.db.save(position);
-            grid.display.refresh();
-            const { winner, winnerMoves, isATie } = grid.db.checkWinner();
-            if (winner) {
-                over(winner, winnerMoves);
-                return;
-            }
-            if (isATie) {
-                over(winner, winnerMoves, isATie);
-            }
-            players.current.toggle();
-        };
 
         const getPlayerInput = (e) => {
             const selectedPos = e.target.dataset.pos;
@@ -243,53 +246,60 @@ window.addEventListener("DOMContentLoaded", () => {
             }
             processMove(selectedPos);
             if (autoSecondPlayer) {
-                autoMove();
+                getAutoMove();
             }
         };
 
-        const end = () => {
+        const stopFurtherMoves = () => {
             grid.div.removeEventListener("click", getPlayerInput);
         };
 
-        function over(winner, winnerMoves, isATie) {
-            const gameOver = document.getElementById("game-over");
+        function endGame(winner, winnerMoves, isATie) {
+            const gameOverDiv = document.getElementById("game-over");
 
-            function hideControlls() {
-                gameOver.classList.add("hidden");
-            }
-            function changePlayers() {
-                const changePlayersBtn =
-                    document.getElementById("change-players");
-                changePlayersBtn.addEventListener(
-                    "click",
-                    displayChangePlayers
-                );
-
-                function displayChangePlayers() {
-                    grid.display.hide();
-                    hideControlls();
-                    const formStartGame =
-                        document.getElementById("form-start-game");
-                    formStartGame.classList.remove("hidden");
-
-                    autoSecondPlayer = false;
-                    playAgain();
-                    setNewOne();
-                }
+            function gameOverControllsShow() {
+                gameOverDiv.classList.remove("hidden");
             }
 
-            function displayWinningMove() {
-                if (!isATie) {
-                    grid.display.showWinnerMoves(winnerMoves);
-                }
+            function gameOverControllsHide() {
+                gameOverDiv.classList.add("hidden");
             }
 
             function displayControlls() {
-                const winnerDiv = document.getElementById("winner");
-                gameOver.classList.remove("hidden");
+                gameOverControllsShow();
                 const playAgainBtn = document.getElementById("play-again");
                 playAgainBtn.addEventListener("click", playAgain);
 
+                function playAgain() {
+                    gameOverControllsHide();
+                    grid.db.clear();
+                    grid.display.clearMoves();
+                    players.current = players.x;
+                    start();
+                }
+
+                function displayChangePlayersControll() {
+                    const changePlayersBtn =
+                        document.getElementById("change-players");
+                    changePlayersBtn.addEventListener(
+                        "click",
+                        goBackToStartScreen
+                    );
+
+                    function goBackToStartScreen() {
+                        grid.display.hide();
+                        gameOverControllsHide();
+                        autoSecondPlayer = false;
+                        playAgain();
+                        setNewOne();
+                    }
+                }
+
+                displayChangePlayersControll();
+            }
+
+            function displayWinner() {
+                const winnerDiv = document.getElementById("winner");
                 if (isATie) {
                     winnerDiv.innerText = "It's a tie";
                     return;
@@ -298,24 +308,21 @@ window.addEventListener("DOMContentLoaded", () => {
                 winnerDiv.innerText = `Winner: ${winner.symbol}`;
             }
 
-            function playAgain() {
-                const gameOver = document.getElementById("game-over");
-                gameOver.classList.add("hidden");
-                grid.db.clear();
-                grid.display.clearMoves();
-                players.current = players.x;
-                start();
+            function displayWinningMove() {
+                if (!isATie) {
+                    grid.display.winnerMoves(winnerMoves);
+                }
             }
 
-            end();
-            displayControlls();
+            stopFurtherMoves();
+            displayWinner();
             displayWinningMove();
-            changePlayers();
+            displayControlls();
         }
 
-        return { displayType, setNewOne };
+        return { askType, setNewOne };
     })();
 
-    game.displayType();
+    game.askType();
     game.setNewOne();
 });
