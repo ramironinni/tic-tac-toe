@@ -30,8 +30,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 return false;
             };
 
-            const save = (e) => {
-                const selectedPos = e.target.dataset.pos;
+            const save = (selectedPos) => {
                 grid.db.storage[selectedPos] = players.current.symbol;
             };
 
@@ -100,19 +99,19 @@ window.addEventListener("DOMContentLoaded", () => {
         const div = document.getElementById("grid");
 
         const display = (() => {
-            const showMove = (e) => {
-                const selectedPos = e.target;
+            const refresh = () => {
+                db.storage.forEach((position, index) => {
+                    if (position != null) {
+                        const positionDiv = document.getElementById(
+                            `position-${index}`
+                        );
+                        positionDiv.innerText = position;
+                        positionDiv.classList.add("taken");
 
-                if (selectedPos.innerText) {
-                    return;
-                }
-
-                selectedPos.innerText = players.current.symbol;
-                selectedPos.classList.add("taken");
-
-                const playerClass =
-                    players.current.symbol === "X" ? "xs" : "os";
-                selectedPos.classList.add(playerClass);
+                        const playerClass = position === "X" ? "xs" : "os";
+                        positionDiv.classList.add(playerClass);
+                    }
+                });
             };
 
             const clearMoves = () => {
@@ -133,7 +132,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 });
             };
 
-            return { showMove, clearMoves, showWinnerMoves };
+            return { refresh, clearMoves, showWinnerMoves };
         })();
 
         const show = () => {
@@ -144,9 +143,9 @@ window.addEventListener("DOMContentLoaded", () => {
     })();
 
     const game = (() => {
-        const setType = () => {
-            const playerOne = document.getElementById("1-player-label");
-            const playersTwo = document.getElementById("2-players-label");
+        const displayType = () => {
+            const singlePlayer = document.getElementById("1-player-label");
+            const twoPlayers = document.getElementById("2-players-label");
 
             const playersContainer = document.getElementById(
                 "players-quantity-container"
@@ -157,14 +156,14 @@ window.addEventListener("DOMContentLoaded", () => {
             function checkedSelection(e) {
                 if (e.currentTarget != e.target) {
                     const label = e.target;
-                    if (label === playerOne) {
-                        playerOne.classList.add("players-selected");
-                        playersTwo.classList.remove("players-selected");
+                    if (label === singlePlayer) {
+                        singlePlayer.classList.add("players-selected");
+                        twoPlayers.classList.remove("players-selected");
                     }
 
-                    if (label === playersTwo) {
-                        playersTwo.classList.add("players-selected");
-                        playerOne.classList.remove("players-selected");
+                    if (label === twoPlayers) {
+                        twoPlayers.classList.add("players-selected");
+                        singlePlayer.classList.remove("players-selected");
                     }
 
                     const startBtn = document.getElementById(
@@ -174,12 +173,20 @@ window.addEventListener("DOMContentLoaded", () => {
                 }
             }
         };
+
+        let autoSecondPlayer = false;
+
         const setFirstOne = () => {
             const formStartGame = document.getElementById("form-start-game");
             formStartGame.addEventListener("submit", setGameBoard);
 
             function setGameBoard(e) {
                 e.preventDefault();
+
+                const singlePlayer = e.target[0].checked;
+                if (singlePlayer) {
+                    autoSecondPlayer = true;
+                }
 
                 formStartGame.classList.add("hidden");
                 grid.show();
@@ -188,17 +195,26 @@ window.addEventListener("DOMContentLoaded", () => {
         };
 
         const start = () => {
-            grid.div.addEventListener("click", processMove);
+            grid.div.addEventListener("click", getPlayerInput);
         };
 
-        const processMove = (e) => {
-            const selectedPos = e.target.dataset.pos;
-            if (grid.db.isTaken(selectedPos)) {
-                return;
-            }
+        function autoMove() {
+            const notTakenPos = (() => {
+                const pos = grid.db.storage.reduce((a, e, i) => {
+                    if (e === null) a.push(i);
+                    return a;
+                }, []);
+                return pos;
+            })();
 
-            grid.db.save(e);
-            grid.display.showMove(e);
+            const randomIndex = Math.floor(Math.random() * notTakenPos.length);
+
+            processMove(notTakenPos[randomIndex]);
+        }
+
+        const processMove = (position) => {
+            grid.db.save(position);
+            grid.display.refresh();
             const { winner, winnerMoves, isATie } = grid.db.checkWinner();
             if (winner) {
                 over(winner, winnerMoves);
@@ -210,8 +226,19 @@ window.addEventListener("DOMContentLoaded", () => {
             players.current.toggle();
         };
 
+        const getPlayerInput = (e) => {
+            const selectedPos = e.target.dataset.pos;
+            if (grid.db.isTaken(selectedPos)) {
+                return;
+            }
+            processMove(selectedPos);
+            if (autoSecondPlayer) {
+                autoMove();
+            }
+        };
+
         const end = () => {
-            grid.div.removeEventListener("click", processMove);
+            grid.div.removeEventListener("click", getPlayerInput);
         };
 
         function over(winner, winnerMoves, isATie) {
@@ -250,9 +277,9 @@ window.addEventListener("DOMContentLoaded", () => {
             displayWinningMove();
         }
 
-        return { setType, setFirstOne };
+        return { displayType, setFirstOne };
     })();
 
-    game.setType();
+    game.displayType();
     game.setFirstOne();
 });
