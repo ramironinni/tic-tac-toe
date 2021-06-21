@@ -245,7 +245,9 @@ window.addEventListener("DOMContentLoaded", () => {
                 return;
             }
             processMove(selectedPos);
-            if (autoSecondPlayer) {
+
+            const { winner } = grid.db.checkWinner();
+            if (autoSecondPlayer && !winner) {
                 getAutoMove();
             }
         };

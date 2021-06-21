@@ -168,17 +168,11 @@ input {
 
 #game-over {
     margin-top: 10px;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     flex-wrap: wrap;
-}
-
-#game-over-controllers-1 {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
 }
 
 #marker {
@@ -213,8 +207,11 @@ input {
     transform: rotate(1deg);
 }
 
-#game-over-controllers-2 {
-    margin-top: 10px;
+#game-over-controllers {
+    display: flex;
+    width: 100%;
+    justify-content: space-around;
+    margin-top: 20px;
 }
 
 #change-players {
