@@ -81,16 +81,6 @@ input {
     outline: none;
 }
 
-button:hover {
-    color: #34a31e;
-    font-weight: 600;
-    transition: 0.4s;
-}
-
-button[type="submit"] {
-    background-color: transparent;
-}
-
 #start-btn-container {
     font-size: 30px;
     background-color: transparent;
@@ -161,11 +151,11 @@ button[type="submit"] {
 }
 
 .xs {
-    color: #a32a2a;
+    color: #a32a2ae0;
 }
 
 .os {
-    color: #2938c4;
+    color: #2938c4de;
 }
 
 .winning-position {
@@ -179,9 +169,27 @@ button[type="submit"] {
 #game-over {
     margin-top: 10px;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    width: 100%;
+    flex-wrap: wrap;
+}
+
+#game-over-controllers-1 {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+#marker {
+    position: absolute;
+    left: 0;
+    height: 30px;
+    width: 110px;
+    border-radius: 9px 35px 10px 41px;
+    border-right: 6px solid #43da257a;
+    border-left: 6px solid #43da257a;
+    transform: rotate(-9deg);
 }
 
 #winner-container {
@@ -197,20 +205,22 @@ button[type="submit"] {
     position: relative;
 }
 
-#marker {
-    position: absolute;
-    left: 0;
-    height: 30px;
-    width: 110px;
-    border-radius: 9px 35px 10px 41px;
-    border-right: 6px solid #43da257a;
-    border-left: 6px solid #43da257a;
-    transform: rotate(-9deg);
-}
-
 #play-again {
     font-size: 20px;
     font-weight: 600;
-    border-bottom: 5px solid #43da257a;
+    height: min-content;
+    border-bottom: 5px solid #ff91007a;
     transform: rotate(1deg);
+}
+
+#game-over-controllers-2 {
+    margin-top: 10px;
+}
+
+#change-players {
+    font-size: 18px;
+    font-weight: 600;
+    height: min-content;
+    border-bottom: 5px solid #da25d159;
+    transform: rotate(-5deg);
 }
