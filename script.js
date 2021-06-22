@@ -70,6 +70,10 @@ window.addEventListener("DOMContentLoaded", () => {
                     [2, 4, 6],
                 ];
 
+                let winner = false;
+                let winnerMoves = false;
+                let isATie = false;
+
                 function checkForWinner(moves, player, winningMoves) {
                     if (
                         moves.indexOf(winningMoves[0]) > -1 &&
@@ -80,10 +84,6 @@ window.addEventListener("DOMContentLoaded", () => {
                         winnerMoves = winningMoves;
                     }
                 }
-
-                let winner = null;
-                let winnerMoves = null;
-                let isATie = null;
 
                 gameOverWinningMoves.forEach((winningMoves) => {
                     checkForWinner(moves.x, players.x, winningMoves);
@@ -147,79 +147,30 @@ window.addEventListener("DOMContentLoaded", () => {
             div.classList.remove("hidden");
         };
 
-        return { db, display, show, div };
+        const reset = () => {
+            db.clear();
+            display.clearMoves();
+            players.current = players.x;
+        };
+
+        return { db, display, show, div, reset };
     })();
 
     // *** GAME ***
 
     const game = (() => {
-        const askType = () => {
-            const singlePlayer = document.getElementById("single-player-label");
-            const twoPlayers = document.getElementById("two-players-label");
-
-            const playersContainer = document.getElementById(
-                "players-quantity-container"
-            );
-
-            playersContainer.addEventListener("click", displayType);
-
-            function displayType(e) {
-                if (e.currentTarget != e.target) {
-                    const label = e.target;
-                    if (label === singlePlayer) {
-                        singlePlayer.classList.add("players-selected");
-                        twoPlayers.classList.remove("players-selected");
-                    }
-
-                    if (label === twoPlayers) {
-                        twoPlayers.classList.add("players-selected");
-                        singlePlayer.classList.remove("players-selected");
-                    }
-
-                    const startBtn = document.getElementById(
-                        "start-btn-container"
-                    );
-                    startBtn.classList.remove("hidden");
-                }
-            }
-        };
-
         let autoSecondPlayer = false;
-
-        const setNewOne = () => {
-            const formStartGame = document.getElementById("form-start-game");
-            formStartGame.classList.remove("hidden");
-            formStartGame.addEventListener("submit", setGameBoard);
-
-            function setGameBoard(e) {
-                e.preventDefault();
-
-                const singlePlayer = e.target[0].checked;
-                if (singlePlayer) {
-                    autoSecondPlayer = true;
-                }
-
-                formStartGame.classList.add("hidden");
-                grid.show();
-                start();
-            }
-        };
-
-        const start = () => {
-            grid.div.addEventListener("click", getPlayerInput);
-        };
 
         const processMove = (position) => {
             grid.db.save(position);
             grid.display.refresh();
+
             const { winner, winnerMoves, isATie } = grid.db.checkWinner();
-            if (winner) {
-                endGame(winner, winnerMoves);
+            if (winner || isATie) {
+                endGame(winner, winnerMoves, isATie);
                 return;
             }
-            if (isATie) {
-                endGame(winner, winnerMoves, isATie);
-            }
+
             players.current.toggle();
         };
 
@@ -252,8 +203,17 @@ window.addEventListener("DOMContentLoaded", () => {
             }
         };
 
-        const stopFurtherMoves = () => {
-            grid.div.removeEventListener("click", getPlayerInput);
+        const allowMoves = () => {
+            grid.div.addEventListener("click", getPlayerInput);
+        };
+
+        const formStartGame = document.getElementById("form-start-game");
+
+        const showFormStart = () => {
+            formStartGame.classList.remove("hidden");
+        };
+        const hideFormStart = () => {
+            formStartGame.classList.add("hidden");
         };
 
         function endGame(winner, winnerMoves, isATie) {
@@ -268,16 +228,14 @@ window.addEventListener("DOMContentLoaded", () => {
             }
 
             function displayControlls() {
-                gameOverControllsShow();
-                const playAgainBtn = document.getElementById("play-again");
-                playAgainBtn.addEventListener("click", playAgain);
-
-                function playAgain() {
-                    gameOverControllsHide();
-                    grid.db.clear();
-                    grid.display.clearMoves();
-                    players.current = players.x;
-                    start();
+                function displayPlayAgainControll() {
+                    const playAgainBtn = document.getElementById("play-again");
+                    playAgainBtn.addEventListener("click", playAgain);
+                    function playAgain() {
+                        gameOverControllsHide();
+                        grid.reset();
+                        allowMoves();
+                    }
                 }
 
                 function displayChangePlayersControll() {
@@ -292,12 +250,15 @@ window.addEventListener("DOMContentLoaded", () => {
                         grid.display.hide();
                         gameOverControllsHide();
                         autoSecondPlayer = false;
-                        playAgain();
+                        grid.reset();
+                        showFormStart();
                         setNewOne();
                     }
                 }
 
+                gameOverControllsShow();
                 displayChangePlayersControll();
+                displayPlayAgainControll();
             }
 
             function displayWinner() {
@@ -310,17 +271,69 @@ window.addEventListener("DOMContentLoaded", () => {
                 winnerDiv.innerText = `Winner: ${winner.symbol}`;
             }
 
-            function displayWinningMove() {
+            function displayWinnerMoves() {
                 if (!isATie) {
                     grid.display.winnerMoves(winnerMoves);
                 }
             }
 
+            const stopFurtherMoves = () => {
+                grid.div.removeEventListener("click", getPlayerInput);
+            };
+
             stopFurtherMoves();
             displayWinner();
-            displayWinningMove();
+            displayWinnerMoves();
             displayControlls();
         }
+
+        const setNewOne = () => {
+            formStartGame.addEventListener("submit", setGameBoard);
+
+            function setGameBoard(e) {
+                e.preventDefault();
+
+                const singlePlayer = e.target[0].checked;
+                if (singlePlayer) {
+                    autoSecondPlayer = true;
+                }
+
+                hideFormStart();
+                grid.show();
+                allowMoves();
+            }
+        };
+
+        const askType = () => {
+            const singlePlayer = document.getElementById("single-player-label");
+            const twoPlayers = document.getElementById("two-players-label");
+
+            const playersContainer = document.getElementById(
+                "players-quantity-container"
+            );
+
+            playersContainer.addEventListener("click", displayType);
+
+            function displayType(e) {
+                if (e.currentTarget != e.target) {
+                    const label = e.target;
+                    if (label === singlePlayer) {
+                        singlePlayer.classList.add("players-selected");
+                        twoPlayers.classList.remove("players-selected");
+                    }
+
+                    if (label === twoPlayers) {
+                        twoPlayers.classList.add("players-selected");
+                        singlePlayer.classList.remove("players-selected");
+                    }
+
+                    const startBtn = document.getElementById(
+                        "start-btn-container"
+                    );
+                    startBtn.classList.remove("hidden");
+                }
+            }
+        };
 
         return { askType, setNewOne };
     })();
