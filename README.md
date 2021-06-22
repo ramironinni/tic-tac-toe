@@ -6,3 +6,5 @@
 - It has encouraged me to write clean code using factory functions and the module pattern. 
 - I've learned some interesting things about game logic as well. I've had to figure it out how to translate that logic to functional JavaScript code: how to storage the moves, how to validate them, how to toggle the user after every move, how to check for a winner, how to display this stuff on the screen and so on.
 - I hope you enjoy it as much as I've enjoyed coding it!
+
+Check the live page here: https://ramironinni.github.io/tic-tac-toe/
